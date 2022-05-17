@@ -1,8 +1,8 @@
+using Mirror;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Projectile : MonoBehaviour
+public class Projectile : NetworkBehaviour
 {
     private int _damage;
     private Rigidbody2D _rb;
@@ -13,7 +13,7 @@ public class Projectile : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
     }
 
-    public void SetValues(int damage, float speed, float life, PlayerController self)
+    public void Spawned(int damage, float speed, float life, PlayerController self)
     {
         _owner = self;
         _damage = damage;
@@ -24,7 +24,7 @@ public class Projectile : MonoBehaviour
     private IEnumerator KillTimer(float life)
     {
         yield return new WaitForSeconds(life);
-        Destroy(gameObject);
+        NetworkServer.Destroy(gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -34,7 +34,7 @@ public class Projectile : MonoBehaviour
         if (controller == _owner) return;
 
         controller.TakeDamage(_damage);
-        StopCoroutine(KillTimer(0));
-        Destroy(gameObject);
+        //StopCoroutine(KillTimer(0));
+        //NetworkServer.Destroy(gameObject);
     }
 }

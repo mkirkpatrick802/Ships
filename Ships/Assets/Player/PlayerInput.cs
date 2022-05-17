@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+
+
+[RequireComponent(typeof(PlayerController))]
 public class PlayerInput : NetworkBehaviour
 {
     private Vector2 _moveDir;

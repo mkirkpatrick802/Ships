@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
+
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerController : NetworkBehaviour
 {
 
@@ -33,33 +36,45 @@ public class PlayerController : NetworkBehaviour
         _canFire = true;
     }
 
+    [Client]
     public void Move(Vector2 dir)
     {
         if (_rb.velocity.magnitude > _maxSpeed) return;
         _rb.velocity += _acceleration * Time.deltaTime * dir;
     }
 
+    [Client]
     public void Rotate(float angle)
     {
         transform.rotation = Quaternion.AngleAxis(angle - 90f, Vector3.forward);
     }
 
+    [Client]
     public void Fire()
     {
         if (!_canFire) return;
         _canFire = false;
 
-        Projectile projectile = Instantiate(_projectile, _firepoint.position, _firepoint.rotation).GetComponent<Projectile>();
-        projectile.SetValues(_damage, _projectileSpeed, _projectileLife, this);
+        SpawnProjectile();
         StartCoroutine(Cooldown());
     }
 
+    [Command]
+    private void SpawnProjectile()
+    {
+        Projectile projectile = Instantiate(_projectile, _firepoint.position, _firepoint.rotation).GetComponent<Projectile>();
+        projectile.Spawned(_damage, _projectileSpeed, _projectileLife, this);
+        NetworkServer.Spawn(projectile.gameObject, connectionToClient);
+    }
+
+    [Client]
     private IEnumerator Cooldown()
     {
         yield return new WaitForSeconds(_fireRate);
         _canFire = true;
     }
 
+    [Client]
     public void TakeDamage(int damage)
     {
         _health.TakeDamage(damage);
