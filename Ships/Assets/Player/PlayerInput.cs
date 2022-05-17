@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class PlayerInput : MonoBehaviour
+using Mirror;
+public class PlayerInput : NetworkBehaviour
 {
     private Vector2 _moveDir;
+    private float _rotateAngle;
     private PlayerController _controller;
     private Camera _camera;
 
@@ -17,15 +18,23 @@ public class PlayerInput : MonoBehaviour
 
     private void Update()
     {
+        if (!isLocalPlayer) return;
+
+        //Movement Input
         _moveDir = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
+        //Rotation Input
         Vector2 pos = _camera.ScreenToWorldPoint(Input.mousePosition);
-        float angle = AngleBetweenPoints(pos, transform.position);
-        _controller.Rotate(angle);
+        _rotateAngle = AngleBetweenPoints(pos, transform.position);
+
+        //Shoot Input
+        if (!Input.GetMouseButton(0)) return;
+        _controller.Fire();
     }
 
     private void FixedUpdate()
     {
+        _controller.Rotate(_rotateAngle);
         _controller.Move(_moveDir.normalized);
     }
 
