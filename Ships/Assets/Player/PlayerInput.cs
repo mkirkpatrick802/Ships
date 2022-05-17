@@ -37,6 +37,8 @@ public class PlayerInput : NetworkBehaviour
 
     private void FixedUpdate()
     {
+        if (!isLocalPlayer) return;
+
         _controller.Rotate(_rotateAngle);
         _controller.Move(_moveDir.normalized);
     }

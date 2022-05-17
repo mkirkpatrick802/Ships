@@ -63,7 +63,7 @@ public class PlayerController : NetworkBehaviour
     private void SpawnProjectile()
     {
         Projectile projectile = Instantiate(_projectile, _firepoint.position, _firepoint.rotation).GetComponent<Projectile>();
-        projectile.Spawned(_damage, _projectileSpeed, _projectileLife, this);
+        projectile.Spawned(_damage, _projectileSpeed, _projectileLife, transform);
         NetworkServer.Spawn(projectile.gameObject, connectionToClient);
     }
 
@@ -74,13 +74,13 @@ public class PlayerController : NetworkBehaviour
         _canFire = true;
     }
 
-    [Client]
+    [TargetRpc]
     public void TakeDamage(int damage)
     {
         _health.TakeDamage(damage);
         if (_health.CurrentHealth > 1) return;
 
         //Player is Dead
-        print("DEAD");
+        NetworkServer.Destroy(gameObject);
     }
 }

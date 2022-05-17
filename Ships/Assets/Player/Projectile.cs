@@ -6,35 +6,41 @@ public class Projectile : NetworkBehaviour
 {
     private int _damage;
     private Rigidbody2D _rb;
-    private PlayerController _owner;
+    private Transform _owner;
 
-    private void Awake()
+    [Server]
+    public void Spawned(int damage, float speed, float life, Transform owner)
     {
-        _rb = GetComponent<Rigidbody2D>();
-    }
-
-    public void Spawned(int damage, float speed, float life, PlayerController self)
-    {
-        _owner = self;
+        _owner = owner;
         _damage = damage;
+        _rb = GetComponent<Rigidbody2D>();
         _rb.AddForce(speed * transform.up, ForceMode2D.Impulse);
         StartCoroutine(KillTimer(life));
     }
 
+    [Server]
     private IEnumerator KillTimer(float life)
     {
         yield return new WaitForSeconds(life);
         NetworkServer.Destroy(gameObject);
     }
 
+    [Client]
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (!collision.CompareTag("Player")) return;
-        PlayerController controller = collision.transform.GetComponent<PlayerController>();
-        if (controller == _owner) return;
+        PlayerHit(collision.transform);
+    }
 
+    [Command(requiresAuthority = false)]
+    private void PlayerHit(Transform player)
+    {
+        if (player == _owner) return;
+
+        print(player.name + _owner.name);
+
+        PlayerController controller = player.GetComponent<PlayerController>();
         controller.TakeDamage(_damage);
-        //StopCoroutine(KillTimer(0));
-        //NetworkServer.Destroy(gameObject);
+        NetworkServer.Destroy(gameObject);
     }
 }
