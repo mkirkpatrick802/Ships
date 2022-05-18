@@ -25,7 +25,6 @@ public class Projectile : NetworkBehaviour
         NetworkServer.Destroy(gameObject);
     }
 
-    [Client]
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (!collision.CompareTag("Player")) return;

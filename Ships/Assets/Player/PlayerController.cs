@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
-
+using System;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : NetworkBehaviour
 {
+    public static event Action<Transform> LocalPlayerJoined; 
+
 
     //TO-DO: Make these a scriptable object
     [Header("Movement Settings")]
@@ -34,6 +36,12 @@ public class PlayerController : NetworkBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _health = new Health(_startingHealth);
         _canFire = true;
+    }
+
+    private void Start()
+    {
+        if (!isLocalPlayer) return;
+        LocalPlayerJoined?.Invoke(transform);
     }
 
     [Client]
@@ -74,7 +82,7 @@ public class PlayerController : NetworkBehaviour
         _canFire = true;
     }
 
-    [TargetRpc]
+    [ClientRpc]
     public void TakeDamage(int damage)
     {
         _health.TakeDamage(damage);
