@@ -71,7 +71,9 @@ public class PlayerController : NetworkBehaviour
     private void SpawnProjectile()
     {
         Projectile projectile = Instantiate(_projectile, _firepoint.position, _firepoint.rotation).GetComponent<Projectile>();
-        projectile.Spawned(_damage, _projectileSpeed, _projectileLife, transform);
+        projectile.GetComponent<Rigidbody2D>().AddForce(_projectileSpeed * transform.up, ForceMode2D.Impulse);
+
+        projectile.Spawned(_damage, _projectileLife, transform);
         NetworkServer.Spawn(projectile.gameObject, connectionToClient);
     }
 
