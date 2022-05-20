@@ -63,15 +63,15 @@ public class PlayerController : NetworkBehaviour
         if (!_canFire) return;
         _canFire = false;
 
-        SpawnProjectile();
+        SpawnProjectile(_firepoint.position, _firepoint.rotation, _firepoint.up);
         StartCoroutine(Cooldown());
     }
 
     [Command]
-    private void SpawnProjectile()
+    private void SpawnProjectile(Vector2 firepointPos, Quaternion firepointRot, Vector2 firepointUp)
     {
-        Projectile projectile = Instantiate(_projectile, _firepoint.position, _firepoint.rotation).GetComponent<Projectile>();
-        projectile.GetComponent<Rigidbody2D>().AddForce(_projectileSpeed * transform.up, ForceMode2D.Impulse);
+        Projectile projectile = Instantiate(_projectile, firepointPos, firepointRot).GetComponent<Projectile>();
+        projectile.GetComponent<Rigidbody2D>().AddForce(_projectileSpeed * firepointUp, ForceMode2D.Impulse);
 
         projectile.Spawned(_damage, _projectileLife, transform);
         NetworkServer.Spawn(projectile.gameObject, connectionToClient);
